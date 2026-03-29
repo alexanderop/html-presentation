@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Presentations — Zero-Dependency Slides</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f172a;--text:#e2e8f0;--accent:#38bdf8;--accent2:#818cf8;
+    --code-bg:#1e293b;--slide-bg:#1e293b;--border:#334155;
+    --font-sans:system-ui,-apple-system,'Segoe UI',sans-serif;
+    --font-mono:'SF Mono','Fira Code','Cascadia Code',monospace;
+  }
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-sans)}
+  .slide{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;padding:4rem 6rem;
+    opacity:0;pointer-events:none;transition:opacity .4s ease,transform .4s ease;
+    transform:translateX(40px);
+  }
+  .slide.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+  .slide.prev{transform:translateX(-40px)}
+  .slide-inner{max-width:960px;width:100%;text-align:left}
+  h1{font-size:3rem;font-weight:800;line-height:1.15;margin-bottom:1.5rem;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  h2{font-size:2rem;font-weight:700;margin-bottom:1rem;color:var(--accent)}
+  h3{font-size:1.5rem;font-weight:600;margin-bottom:.75rem;color:var(--text)}
+  p{font-size:1.25rem;line-height:1.7;margin-bottom:1rem;color:var(--text);opacity:.9}
+  ul,ol{font-size:1.2rem;line-height:1.8;margin-bottom:1rem;padding-left:1.5em}
+  li{margin-bottom:.4rem}
+  li::marker{color:var(--accent)}
+  code{font-family:var(--font-mono);background:var(--code-bg);padding:.15em .4em;
+    border-radius:4px;font-size:.9em;border:1px solid var(--border)}
+  pre{background:var(--code-bg);padding:1.5rem;border-radius:10px;
+    overflow-x:auto;margin-bottom:1.5rem;border:1px solid var(--border)}
+  pre code{background:none;border:none;padding:0;font-size:.95rem;line-height:1.6}
+  blockquote{border-left:4px solid var(--accent);padding:.75rem 1.25rem;
+    margin-bottom:1rem;font-style:italic;opacity:.85;background:rgba(56,189,248,.05);
+    border-radius:0 8px 8px 0}
+  table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:1.1rem}
+  th{background:var(--code-bg);padding:.75rem 1rem;text-align:left;
+    border-bottom:2px solid var(--accent);font-weight:600}
+  td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+  img{max-width:100%;max-height:60vh;border-radius:10px;margin:1rem 0}
+  strong{color:var(--accent);font-weight:600}
+  em{color:var(--accent2)}
+  a{color:var(--accent);text-decoration:underline}
+
+  /* Cover slide */
+  .slide.cover .slide-inner{text-align:center}
+  .slide.cover h1{font-size:3.5rem}
+  .slide.cover p{font-size:1.4rem;opacity:.7}
+
+  /* Two columns */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:2rem;width:100%}
+
+  /* Progress bar */
+  #progress{position:fixed;bottom:0;left:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    transition:width .3s ease;z-index:100}
+
+  /* Slide counter */
+  #counter{position:fixed;bottom:1rem;right:1.5rem;font-size:.85rem;
+    opacity:.4;font-family:var(--font-mono);z-index:100}
+
+  /* Help overlay */
+  #help{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;
+    justify-content:center;align-items:center;z-index:200;opacity:0;
+    pointer-events:none;transition:opacity .3s}
+  #help.visible{opacity:1;pointer-events:auto}
+  #help-box{background:var(--slide-bg);padding:2.5rem;border-radius:12px;
+    border:1px solid var(--border);max-width:480px;width:90%}
+  #help-box h2{font-size:1.4rem;margin-bottom:1rem}
+  #help-box table{font-size:.95rem}
+  #help-box td:first-child{font-family:var(--font-mono);padding-right:1.5rem;
+    white-space:nowrap;color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div id="slides">
+<div class="slide cover"><div class="slide-inner">
+<h1>HTML Presentations</h1>
+<p>Zero-dependency slides from a single prompt</p>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>The Problem</h2>
+<ul>
+<li>Slide tools require accounts, installs, or subscriptions</li>
+<li>Markdown-to-slides tools need build steps and config</li>
+<li>Sharing means exporting PDFs or sending links to hosted services</li>
+<li>You just want to <strong>present something quickly</strong></li>
+</ul>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>The Solution</h2>
+<p>A Claude Code skill that generates a <strong>single, self-contained HTML file</strong> you can open in any browser.</p>
+<ul>
+<li>No dependencies</li>
+<li>No build step</li>
+<li>No slides app needed</li>
+<li>Works offline</li>
+</ul>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>How It Works</h2>
+<ol>
+<li>You say <code>create a presentation about X</code></li>
+<li>Claude generates markdown with slide separators</li>
+<li>Each slide becomes an HTML <code>&lt;div&gt;</code> block</li>
+<li>Everything is embedded in a single <code>.html</code> file</li>
+<li>It opens in your browser automatically</li>
+</ol>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>Features</h2>
+<div class="cols">
+<div>
+<h3>Navigation</h3>
+<ul>
+<li>Arrow keys &amp; space</li>
+<li>Home / End keys</li>
+<li>1-9 to jump to slide</li>
+<li>Touch &amp; swipe support</li>
+</ul>
+</div>
+<div>
+<h3>Design</h3>
+<ul>
+<li>Dark theme</li>
+<li>Gradient headings</li>
+<li>Progress bar</li>
+<li>Fullscreen mode</li>
+</ul>
+</div>
+</div>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>Rich Content Support</h2>
+<p>Presentations can include all standard markdown elements:</p>
+<ul>
+<li><strong>Code blocks</strong> with syntax highlighting styles</li>
+<li><strong>Tables</strong> for structured data</li>
+<li><strong>Blockquotes</strong> for callouts</li>
+<li><strong>Two-column layouts</strong> for comparisons</li>
+<li><strong>Images</strong> and <strong>links</strong></li>
+</ul>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>Code Blocks</h2>
+<p>Styled and readable, right in the slides:</p>
+<pre><code>// Install the skill
+npx skills add alexanderop/html-presentation
+
+// Then just ask Claude
+"Create a presentation about microservices"
+"Make slides about our Q4 roadmap"
+"Present about TypeScript best practices"</code></pre>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>Portable by Design</h2>
+<table>
+<tr><th>Feature</th><th>HTML Presentation</th><th>Traditional Tools</th></tr>
+<tr><td>Dependencies</td><td><strong>None</strong></td><td>App or service required</td></tr>
+<tr><td>Sharing</td><td><strong>Send one file</strong></td><td>Export, upload, or link</td></tr>
+<tr><td>Offline</td><td><strong>Works anywhere</strong></td><td>Often needs internet</td></tr>
+<tr><td>Customization</td><td><strong>Edit the HTML</strong></td><td>Limited to app features</td></tr>
+</table>
+</div></div>
+
+<div class="slide"><div class="slide-inner">
+<h2>Get Started</h2>
+<pre><code>npx skills add alexanderop/html-presentation</code></pre>
+<p>Then tell Claude:</p>
+<blockquote>Create a presentation about anything you want to share.</blockquote>
+<p>Open the generated <code>.html</code> file in your browser. Done.</p>
+</div></div>
+</div>
+
+<div id="progress"></div>
+<div id="counter"></div>
+
+<div id="help">
+  <div id="help-box">
+    <h2>Keyboard Shortcuts</h2>
+    <table>
+      <tr><td>&rarr; / Space</td><td>Next slide</td></tr>
+      <tr><td>&larr;</td><td>Previous slide</td></tr>
+      <tr><td>Home</td><td>First slide</td></tr>
+      <tr><td>End</td><td>Last slide</td></tr>
+      <tr><td>1-9</td><td>Jump to slide</td></tr>
+      <tr><td>F</td><td>Fullscreen</td></tr>
+      <tr><td>?</td><td>Toggle help</td></tr>
+      <tr><td>Esc</td><td>Close help</td></tr>
+    </table>
+  </div>
+</div>
+
+<script>
+(function(){
+  const slides=document.querySelectorAll('.slide');
+  const total=slides.length;
+  let current=0;
+  const progress=document.getElementById('progress');
+  const counter=document.getElementById('counter');
+  const help=document.getElementById('help');
+
+  function go(n){
+    if(n<0||n>=total)return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add(n>current?'prev':'');
+    slides.forEach(s=>s.classList.remove('prev'));
+    current=n;
+    slides[current].classList.add('active');
+    progress.style.width=((current+1)/total*100)+'%';
+    counter.textContent=(current+1)+' / '+total;
+    history.replaceState(null,'','#'+(current+1));
+  }
+
+  document.addEventListener('keydown',e=>{
+    if(help.classList.contains('visible')){
+      if(e.key==='Escape'||e.key==='?')help.classList.remove('visible');
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case' ':e.preventDefault();go(current+1);break;
+      case'ArrowLeft':go(current-1);break;
+      case'Home':go(0);break;
+      case'End':go(total-1);break;
+      case'f':case'F':
+        document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+        break;
+      case'?':help.classList.toggle('visible');break;
+      default:
+        if(e.key>='1'&&e.key<='9')go(parseInt(e.key)-1);
+    }
+  });
+
+  // Touch support
+  let touchX=0;
+  document.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-touchX;
+    if(Math.abs(dx)>50){dx<0?go(current+1):go(current-1)}
+  });
+
+  // Hash navigation
+  const hash=parseInt(location.hash.slice(1));
+  go(hash>0&&hash<=total?hash-1:0);
+})();
+</script>
+</body>
+</html>

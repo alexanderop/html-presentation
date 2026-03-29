@@ -2,6 +2,8 @@
 
 A Claude Code skill that generates self-contained HTML presentations from any topic. Say "create a presentation about X" and get a single `.html` file you can open in any browser — no dependencies, no build step, no slides app needed.
 
+**[Live demo — example presentation](https://alexanderop.github.io/html-presentation/examples/html-presentations-intro.html)**
+
 ## What it does
 
 1. Generates a markdown file with slide content separated by `---`
